@@ -21,7 +21,7 @@ module Support
       private
 
       def enqueue_delayed_job(worker, *args)
-        ::Delayed::Job.enqueue worker.new(*args), :queue => queue_options[:queue]
+        ::Delayed::Job.enqueue worker.new(*args), :queue => queue_options[:queue], :priority => queue_options[:priority] || 0
       end
 
       def enqueue_resque(worker, *args)
