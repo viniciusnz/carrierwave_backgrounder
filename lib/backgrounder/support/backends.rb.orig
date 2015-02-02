@@ -22,9 +22,14 @@ module CarrierWave
 
           private
 
+<<<<<<< HEAD
+      def enqueue_delayed_job(worker, *args)
+        ::Delayed::Job.enqueue worker.new(*args), :queue => queue_options[:queue], :priority => queue_options[:priority] || 0
+      end
+=======
           def enqueue_delayed_job(worker, *args)
             if ::Delayed::Job.new.respond_to?(:queue)
-              ::Delayed::Job.enqueue worker.new(*args), :queue => queue_options[:queue], :priority => queue_options[:priority] || 0
+              ::Delayed::Job.enqueue worker.new(*args), :queue => queue_options[:queue]
             else
               ::Delayed::Job.enqueue worker.new(*args)
               if queue_options[:queue]
@@ -32,6 +37,7 @@ module CarrierWave
               end
             end
           end
+>>>>>>> upstream/master
 
           def enqueue_resque(worker, *args)
             worker.instance_variable_set('@queue', queue_options[:queue] || :carrierwave)

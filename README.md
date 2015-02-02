@@ -34,7 +34,7 @@ Backgrounder::ORM::Base::store_in_background
 
 ## Installation and Usage
 
-These instructions assume you have previously set up [CarrierWave](https://github.com/jnicklas/carrierwave) and your queing lib of choice.
+These instructions assume you have previously set up [CarrierWave](https://github.com/jnicklas/carrierwave) and your queuing lib of choice.
 
 In Rails, add the following your Gemfile:
 
@@ -55,20 +55,6 @@ CarrierWave::Backgrounder.configure do |c|
 end
 ```
 
-For SuckerPunch, you have to configure your queue with a specific worker.
-
-```ruby
-CarrierWave::Backgrounder.configure do |c|
-  c.backend :sucker_punch, queue: :carrierwave
-end
-
-# It is important to configure sucker_punch after carrierwave_backgrounder
-SuckerPunch.config do
-  queue name: :carrierwave, worker: CarrierWave::Workers::StoreAsset, size: 2
-end
-```
-
-
 In your CarrierWave uploader file:
 
 ```ruby
@@ -88,10 +74,11 @@ mount_uploader :avatar, AvatarUploader
 process_in_background :avatar
 ```
 
-Optionally you can add a column to the database which will be set to nil when the background processing is complete.
+Optionally you can add a column to the database which will be set to `true` when
+the background processing is start and to `false` when the background processing is complete.
 
 ```ruby
-add_column :users, :avatar_processing, :boolean
+add_column :users, :avatar_processing, :boolean, null: false, default: false
 ```
 
 ### To use store_in_background
@@ -116,6 +103,15 @@ If you need to process/store the upload immediately:
 
 ```ruby
 @user.process_<column>_upload = true
+```
+
+This must be set before you assign an upload:
+
+```ruby
+# In a controller
+@user = User.new
+@user.process_avatar_upload = true
+@user.attributes = params[:user]
 ```
 
 ### Override worker

@@ -1,3 +1,28 @@
+
+## 0.4.1
+
+### enhancements
+  * [#179] Set column_processing to false instead of nil [mockdeep]
+
+## 0.4.0
+
+### enhancements
+  * [#175] SuckerPunch v1.0 support (no longer support < 1.0). [janko-m]
+
+### bug fixes
+  * [#176] Check if record exists before running backgrounder [gdott9]
+  * [#169] Correctly remove files on update if marked for deletion [sunny]
+
+## 0.3.0
+
+### enhancements
+  * [#123] Fail silently when record not found in worker. [DouweM]
+
+## 0.2.2
+
+### bug fixes
+  * [#141] Fix naming collisions of support module by namespacing.
+
 ## 0.2.1
 
 ### enhancements

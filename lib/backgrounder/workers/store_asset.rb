@@ -2,30 +2,17 @@
 module CarrierWave
   module Workers
 
-    class StoreAsset < Struct.new(:klass, :id, :column)
+    class StoreAsset < Base
       attr_reader :cache_path, :tmp_directory
 
-      def self.perform(*args)
-        new(*args).perform
-      end
-
       def perform(*args)
-        set_args(*args) if args.present?
-
-        errors = []
-        errors << ::ActiveRecord::RecordNotFound      if defined?(::ActiveRecord)
-        errors << ::Mongoid::Errors::DocumentNotFound if defined?(::Mongoid)
-
-        record = begin
-          constantized_resource.find(id)
-        rescue *errors
-          nil
-        end
+        record = super(*args)
 
         if record && record.send(:"#{column}_tmp")
           store_directories(record)
           record.send :"process_#{column}_upload=", true
           record.send :"#{column}_tmp=", nil
+          record.send :"#{column}_processing=", false if record.respond_to?(:"#{column}_processing")
           File.open(cache_path) { |f| record.send :"#{column}=", f }
           if record.save!
             FileUtils.rm_r(tmp_directory, :force => true)
@@ -34,14 +21,6 @@ module CarrierWave
       end
 
       private
-
-      def set_args(klass, id, column)
-        self.klass, self.id, self.column = klass, id, column
-      end
-
-      def constantized_resource
-        klass.is_a?(String) ? klass.constantize : klass
-      end
 
       def store_directories(record)
         asset, asset_tmp = record.send(:"#{column}"), record.send(:"#{column}_tmp")

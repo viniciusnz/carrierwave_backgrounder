@@ -7,9 +7,6 @@ module CarrierWave
   module Backgrounder
     include Support::Backends
 
-    class UnsupportedBackendError < StandardError ; end
-    class TooManyBackendsAvailableError < StandardError ; end
-
     def self.configure
       yield self
       case @backend
@@ -24,10 +21,10 @@ module CarrierWave
       when :sucker_punch
         require 'sucker_punch'
         ::CarrierWave::Workers::ProcessAsset.class_eval do
-          include ::SuckerPunch::Worker
+          include ::SuckerPunch::Job
         end
         ::CarrierWave::Workers::StoreAsset.class_eval do
-          include ::SuckerPunch::Worker
+          include ::SuckerPunch::Job
         end
       end
     end

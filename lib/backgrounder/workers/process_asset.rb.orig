@@ -5,7 +5,24 @@ module CarrierWave
     class ProcessAsset < Base
 
       def perform(*args)
+<<<<<<< HEAD
+        set_args(*args) if args.present?
+
+        if defined?(::Mongoid)
+          errors = []
+          errors << ::Mongoid::Errors::DocumentNotFound if defined?(::Mongoid)
+
+          record = begin
+            constantized_resource.find(id)
+          rescue *errors
+            nil
+          end
+        else
+          record = constantized_resource.find_by_id(id)
+        end
+=======
         record = super(*args)
+>>>>>>> upstream/master
 
         if record
           record.send(:"process_#{column}_upload=", true)

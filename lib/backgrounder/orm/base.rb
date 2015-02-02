@@ -43,11 +43,6 @@ module CarrierWave
 
           mod = Module.new
           include mod
-          mod.class_eval  <<-RUBY, __FILE__, __LINE__ + 1
-            def set_#{column}_processing
-              self.#{column}_processing = true if respond_to?(:#{column}_processing)
-            end
-          RUBY
 
           _define_shared_backgrounder_methods(mod, column, worker)
         end
@@ -80,6 +75,11 @@ module CarrierWave
           mod = Module.new
           include mod
           mod.class_eval  <<-RUBY, __FILE__, __LINE__ + 1
+            def remove_#{column}=(value)
+              super
+              self.process_#{column}_upload = true
+            end
+
             def write_#{column}_identifier
               super and return if process_#{column}_upload
               self.#{column}_tmp = _mounter(:#{column}).cache_name if _mounter(:#{column}).cache_name
@@ -88,6 +88,7 @@ module CarrierWave
             def store_#{column}!
               super if process_#{column}_upload
             end
+
           RUBY
 
           _define_shared_backgrounder_methods(mod, column, worker)
@@ -99,6 +100,10 @@ module CarrierWave
           mod.class_eval  <<-RUBY, __FILE__, __LINE__ + 1
             def #{column}_updated?; true; end
 
+            def set_#{column}_processing
+              self.#{column}_processing = true if respond_to?(:#{column}_processing)
+            end
+
             def enqueue_#{column}_background_job?
               !remove_#{column}? && !process_#{column}_upload && #{column}_updated?
             end
@@ -108,7 +113,6 @@ module CarrierWave
             end
           RUBY
         end
-
       end # Base
 
     end #ORM
